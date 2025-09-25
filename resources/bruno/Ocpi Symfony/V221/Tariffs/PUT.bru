@@ -1,0 +1,61 @@
+meta {
+  name: PUT
+  type: http
+  seq: 1
+}
+
+put {
+  url: http://127.0.0.1:8000/emsp/2.2.1/tariffs/ES/TET
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Token a6419524-c648-45fc-98d8-ef71695189f7
+}
+
+body:json {
+  {
+    "country_code": "DE",
+    "party_id": "ALL",
+    "id": "16",
+    "currency": "EUR",
+    "min_price": {
+      "excl_vat": 4.00,
+      "incl_vat": 4.40
+    },
+    "max_price": {
+      "excl_vat": 4.00,
+      "incl_vat": 4.40
+    },
+  //   "tariff_alt_text": [
+  //     {
+  //       "language": "en",
+  //       "text": "2.00 euro p/hour including VAT."
+  //     },
+  //     {
+  //       "language": "nl",
+  //       "text": "2.00 euro p/uur inclusief BTW."
+  //     }
+  //   ],
+    "elements": [
+      {
+        "price_components": [
+          {
+            "type": "ENERGY",
+            "price": 0.25,
+            "vat": 10.0,
+            "step_size": 1
+          }
+        ]
+      }
+    ],
+    "start_date_time": "2018-12-17T11:16:55Z",
+    "end_date_time": "2018-12-17T11:16:55Z",
+    "last_updated": "2018-12-17T11:16:55Z"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

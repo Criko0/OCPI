@@ -1,0 +1,12 @@
+# OCPI 2.2.1
+ocpi_v221_cpo:
+  resource: ../../src/Controller/V221/
+  type: attribute
+  prefix: /cpo/2.2.1
+  name_prefix: ocpi_cpo_v221_
+
+ocpi_v221_emsp:
+  resource: ../../src/Controller/V221/
+  type: attribute
+  prefix: /emsp/2.2.1
+  name_prefix: ocpi_emsp_v221_
