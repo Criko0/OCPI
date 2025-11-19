@@ -6,13 +6,11 @@ use App\Attribute\CredentialValidation;
 use App\Attribute\JsonSchemaValidation;
 use App\Dto\V221\tariffs\TariffDto;
 use App\Entity\Credential;
-use App\Entity\Tariff;
 use App\Util\Constants;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\ObjectMapper\ObjectMapper;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/tariffs')]
@@ -23,24 +21,16 @@ final class TariffController extends AbstractController
         name: 'tariffs_put',
         methods: [Request::METHOD_PUT],
     )]
-    public function put(
+    #[OA\Response(
+        response: 200,
+        description: '',
+        content: new OA\JsonContent(
+        )
+    )]
+    public function putTariff(
         #[CredentialValidation] Credential $credential,
         #[JsonSchemaValidation('V221/ocpi.2_2_1.tariff.json')] TariffDto $tariffDto,
-    ): JsonResponse {
-        $mapper = new ObjectMapper(
-            propertyAccessor : PropertyAccess::createPropertyAccessor(),
-        );
-
-        $product = $mapper->map($tariffDto, Tariff::class);
-
-        dd($product);
-
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/TariffsController.php',
-            'value' => $tariffDto,
-            'credential' => $credential,
-        ]);
+    ): void {
     }
 
     #[Route(
@@ -48,7 +38,7 @@ final class TariffController extends AbstractController
         name: 'tariffs_get',
         methods: [Request::METHOD_GET],
     )]
-    public function get(
+    public function getTariff(
         #[CredentialValidation] Credential $credential,
         string $tariffId,
     ): JsonResponse {

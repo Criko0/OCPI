@@ -31,7 +31,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     type?: string|null,
  *     ignore_errors?: bool,
  * }>
- * @psalm-type ParametersConfig = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array|null>|null>
+ * @psalm-type ParametersConfig = array<string, scalar|\UnitEnum|array<scalar|\UnitEnum|array<mixed>|null>|null>
  * @psalm-type ArgumentsType = list<mixed>|array<string, mixed>
  * @psalm-type CallType = array<string, ArgumentsType>|array{0:string, 1?:ArgumentsType, 2?:bool}|array{method:string, arguments?:ArgumentsType, returns_clone?:bool}
  * @psalm-type TagsType = list<string|array<string, array<string, mixed>>> // arrays inside the list must have only one element, with the tag name as the key
@@ -83,7 +83,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     autoconfigure?: bool,
  *     bind?: array<string, mixed>,
  *     constructor?: string,
- *     from_callable?: mixed,
+ *     from_callable?: CallbackType,
  * }
  * @psalm-type AliasType = string|array{
  *     alias: string,
@@ -863,7 +863,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *             repository_factory?: scalar|null, // Default: "doctrine.orm.container_repository_factory"
  *             schema_ignore_classes?: list<scalar|null>,
  *             report_fields_where_declared?: bool, // Set to "true" to opt-in to the new mapping driver mode that was added in Doctrine ORM 2.16 and will be mandatory in ORM 3.0. See https://github.com/doctrine/orm/pull/10455. // Default: true
- *             validate_xml_mapping?: bool, // Set to "true" to opt-in to the new mapping driver mode that was added in Doctrine ORM 2.14 and will be mandatory in ORM 3.0. See https://github.com/doctrine/orm/pull/6728. // Default: false
+ *             validate_xml_mapping?: bool, // Set to "true" to opt-in to the new mapping driver mode that was added in Doctrine ORM 2.14. See https://github.com/doctrine/orm/pull/6728. // Default: false
  *             second_level_cache?: array{
  *                 region_cache_driver?: string|array{
  *                     type?: scalar|null, // Default: null
@@ -918,6 +918,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     },
  * }
  * @psalm-type DoctrineMigrationsConfig = array{
+ *     enable_service_migrations?: bool, // Whether to enable fetching migrations from the service container. // Default: false
  *     migrations_paths?: array<string, scalar|null>,
  *     services?: array<string, scalar|null>,
  *     factories?: array<string, scalar|null>,
@@ -1192,58 +1193,114 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *     dump_destination?: scalar|null, // A stream URL where dumps should be written to. // Default: null
  *     theme?: "dark"|"light", // Changes the color of the dump() output when rendered directly on the templating. "dark" (default) or "light". // Default: "dark"
  * }
+ * @psalm-type NelmioApiDocConfig = array{
+ *     type_info?: bool, // Use the symfony/type-info component for determining types. // Default: false
+ *     use_validation_groups?: bool, // If true, `groups` passed to #[Model] attributes will be used to limit validation constraints // Default: false
+ *     operation_id_generation?: \Nelmio\ApiDocBundle\Describer\OperationIdGeneration::ALWAYS_PREPEND|\Nelmio\ApiDocBundle\Describer\OperationIdGeneration::CONDITIONALLY_PREPEND|\Nelmio\ApiDocBundle\Describer\OperationIdGeneration::NO_PREPEND|"always_prepend"|"conditionally_prepend"|"no_prepend", // How to generate operation ids // Default: "always_prepend"
+ *     cache?: array{
+ *         pool?: scalar|null, // define cache pool to use // Default: null
+ *         item_id?: scalar|null, // define cache item id // Default: null
+ *     },
+ *     documentation?: array<string, mixed>,
+ *     media_types?: list<scalar|null>,
+ *     html_config?: array{ // UI configuration options
+ *         assets_mode?: scalar|null, // Default: "cdn"
+ *         swagger_ui_config?: array<mixed>,
+ *         redocly_config?: array<mixed>,
+ *         stoplight_config?: array<mixed>,
+ *     },
+ *     areas?: array<string, array{ // Default: {"default":{"path_patterns":[],"host_patterns":[],"with_attribute":false,"documentation":[],"name_patterns":[],"disable_default_routes":false,"cache":[],"security":[]}}
+ *         path_patterns?: list<scalar|null>,
+ *         host_patterns?: list<scalar|null>,
+ *         name_patterns?: list<scalar|null>,
+ *         security?: array<string, array{ // Default: []
+ *             type?: scalar|null,
+ *             scheme?: scalar|null,
+ *             in?: scalar|null,
+ *             name?: scalar|null,
+ *             description?: scalar|null,
+ *             openIdConnectUrl?: scalar|null,
+ *             ...<mixed>
+ *         }>,
+ *         with_attribute?: bool, // whether to filter by attributes // Default: false
+ *         disable_default_routes?: bool, // if set disables default routes without attributes // Default: false
+ *         documentation?: array<string, mixed>,
+ *         cache?: array{
+ *             pool?: scalar|null, // define cache pool to use // Default: null
+ *             item_id?: scalar|null, // define cache item id // Default: null
+ *         },
+ *     }>,
+ *     models?: array{
+ *         use_jms?: bool, // Default: false
+ *         names?: list<array{ // Default: []
+ *             alias: scalar|null,
+ *             type: scalar|null,
+ *             groups?: mixed, // Default: null
+ *             options?: mixed, // Default: null
+ *             serializationContext?: list<mixed>,
+ *             areas?: list<scalar|null>,
+ *         }>,
+ *     },
+ * }
+ * @psalm-type ConfigType = array{
+ *     imports?: ImportsConfig,
+ *     parameters?: ParametersConfig,
+ *     services?: ServicesConfig,
+ *     framework?: FrameworkConfig,
+ *     doctrine?: DoctrineConfig,
+ *     doctrine_migrations?: DoctrineMigrationsConfig,
+ *     security?: SecurityConfig,
+ *     monolog?: MonologConfig,
+ *     nelmio_api_doc?: NelmioApiDocConfig,
+ *     "when@dev"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         framework?: FrameworkConfig,
+ *         doctrine?: DoctrineConfig,
+ *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         maker?: MakerConfig,
+ *         security?: SecurityConfig,
+ *         monolog?: MonologConfig,
+ *         debug?: DebugConfig,
+ *         nelmio_api_doc?: NelmioApiDocConfig,
+ *     },
+ *     "when@prod"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         framework?: FrameworkConfig,
+ *         doctrine?: DoctrineConfig,
+ *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         security?: SecurityConfig,
+ *         monolog?: MonologConfig,
+ *         nelmio_api_doc?: NelmioApiDocConfig,
+ *     },
+ *     "when@test"?: array{
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         framework?: FrameworkConfig,
+ *         doctrine?: DoctrineConfig,
+ *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         security?: SecurityConfig,
+ *         monolog?: MonologConfig,
+ *         nelmio_api_doc?: NelmioApiDocConfig,
+ *     },
+ *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
+ *         imports?: ImportsConfig,
+ *         parameters?: ParametersConfig,
+ *         services?: ServicesConfig,
+ *         ...<string, ExtensionType>,
+ *     }>
+ * }
  */
 final class App extends AppReference
 {
     /**
-     * @param array{
-     *     imports?: ImportsConfig,
-     *     parameters?: ParametersConfig,
-     *     services?: ServicesConfig,
-     *     framework?: FrameworkConfig,
-     *     doctrine?: DoctrineConfig,
-     *     doctrine_migrations?: DoctrineMigrationsConfig,
-     *     security?: SecurityConfig,
-     *     monolog?: MonologConfig,
-     *     "when@dev"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         framework?: FrameworkConfig,
-     *         doctrine?: DoctrineConfig,
-     *         doctrine_migrations?: DoctrineMigrationsConfig,
-     *         maker?: MakerConfig,
-     *         security?: SecurityConfig,
-     *         monolog?: MonologConfig,
-     *         debug?: DebugConfig,
-     *     },
-     *     "when@prod"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         framework?: FrameworkConfig,
-     *         doctrine?: DoctrineConfig,
-     *         doctrine_migrations?: DoctrineMigrationsConfig,
-     *         security?: SecurityConfig,
-     *         monolog?: MonologConfig,
-     *     },
-     *     "when@test"?: array{
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         framework?: FrameworkConfig,
-     *         doctrine?: DoctrineConfig,
-     *         doctrine_migrations?: DoctrineMigrationsConfig,
-     *         security?: SecurityConfig,
-     *         monolog?: MonologConfig,
-     *     },
-     *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
-     *         imports?: ImportsConfig,
-     *         parameters?: ParametersConfig,
-     *         services?: ServicesConfig,
-     *         ...<string, ExtensionType>,
-     *     }>
-     * } $config
+     * @param ConfigType $config
+     *
+     * @psalm-return ConfigType
      */
     public static function config(array $config): array
     {
@@ -1264,8 +1321,7 @@ namespace Symfony\Component\Routing\Loader\Configurator;
  *
  *     return Routes::config([
  *         'controllers' => [
- *             'resource' => 'attributes',
- *             'type' => 'tagged_services',
+ *             'resource' => 'routing.controllers',
  *         ],
  *     ]);
  *     ```
